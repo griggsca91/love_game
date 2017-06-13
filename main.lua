@@ -18,7 +18,22 @@ function love.load()
 	}
 	moving = false
 	delay_count = 0
+
+  log_file = love.filesystem.newFile("log"..os.time()..".txt")
+  log_file:open("a") 
+
+
+
 end
+
+function log(log_m)
+  
+  log_file:write(log_m.."\r\n")
+
+  print(log_m)
+end
+
+
 
 function draw_health_bar()
    love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.cur_hp/player.max_hp) * 250), 20)
@@ -75,10 +90,14 @@ end
 
 
 function love.keypressed(key)
+  log("Key: "..key)
 	if key == 'escape' then 
+    log("Quiting")
+    log_file:close()
 		love.event.quit()
 	end
 	if key == 'h' then
+    log("Heal")
       if player.max_hp < player.cur_hp + 10 then
         player.cur_hp = player.max_hp
       else 
@@ -86,6 +105,7 @@ function love.keypressed(key)
       end
 	end
 	if key == 'd' then
+    log("Damage")
     if 0 > player.cur_hp - 10 then 
       player.cur_hp = 0
     else 
@@ -95,7 +115,7 @@ function love.keypressed(key)
 
 
   if key == 'space' then
-    print("attack")
+    log("Attack")
   end
 
 end
