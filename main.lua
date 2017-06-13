@@ -4,13 +4,39 @@ function love.load()
 		y = 256,
 		act_x = 32,
 		act_y = 32,
-		speed = .125
+		speed = .125,
+
+    -- STATS
+
+    hp = 100,
+    strength = 10,
+    defense = 10,
+    intelligence = 10,
+    xp = 0
+
+
+
+
 	}
 	moving = false
 	delay_count = 0
 end
 
+function draw_health_bar()
+   love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.hp/100) * 250), 20)
+   love.graphics.rectangle("line", 10, love.graphics.getHeight() - 100, 250, 20)
+end
 
+function draw_currently_equipped_item()
+
+end
+
+function draw_hud()
+
+  draw_health_bar()
+  draw_currently_equipped_item()  
+
+end
 
 function love.update(dt)
 
@@ -46,6 +72,7 @@ end
 
 function love.draw()
 	love.graphics.rectangle("fill", player.act_x, player.act_y, 32, 32)
+  draw_hud()
 end
 
 
@@ -54,8 +81,13 @@ function love.keypressed(key)
 		love.event.quit()
 	end
 
+	if key == 'h' then
+    player.hp = player.hp + 10
+	end
+
+
 	if key == 'd' then
-		debug.debug()
+    player.hp = player.hp - 10
 	end
 
 end
