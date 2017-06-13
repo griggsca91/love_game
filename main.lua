@@ -4,10 +4,9 @@ function love.load()
 		y = 256,
 		act_x = 32,
 		act_y = 32,
-		speed = .5
+		speed = .125
 	}
 	moving = false
-	delay = .125 
 	delay_count = 0
 end
 
@@ -35,7 +34,7 @@ function love.update(dt)
 		delay_count = 0
 	else
 		delay_count = delay_count + dt
-		moving = delay > delay_count
+		moving = player.speed > delay_count
 	end
 
 	player.act_y = player.act_y - ((player.act_y - player.y))
