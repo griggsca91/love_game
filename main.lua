@@ -8,14 +8,12 @@ function love.load()
 
     -- STATS
 
-    hp = 100,
+    cur_hp = 100,
+    max_hp = 100,
     strength = 10,
     defense = 10,
     intelligence = 10,
     xp = 0
-
-
-
 
 	}
 	moving = false
@@ -23,7 +21,7 @@ function love.load()
 end
 
 function draw_health_bar()
-   love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.hp/100) * 250), 20)
+   love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.cur_hp/player.max_hp) * 250), 20)
    love.graphics.rectangle("line", 10, love.graphics.getHeight() - 100, 250, 20)
 end
 
@@ -80,14 +78,24 @@ function love.keypressed(key)
 	if key == 'escape' then 
 		love.event.quit()
 	end
-
 	if key == 'h' then
-    player.hp = player.hp + 10
+      if player.max_hp < player.cur_hp + 10 then
+        player.cur_hp = player.max_hp
+      else 
+        player.cur_hp = player.cur_hp + 10 
+      end
 	end
-
-
 	if key == 'd' then
-    player.hp = player.hp - 10
+    if 0 > player.cur_hp - 10 then 
+      player.cur_hp = 0
+    else 
+      player.cur_hp = player.cur_hp - 10
+    end
 	end
+
+
+  if key == 'space' then
+    print("attack")
+  end
 
 end
