@@ -1,4 +1,16 @@
+
+maps = require "maps"
+
 function love.load()
+
+
+  STATES = {
+    GAME = "GAME",
+    MAP_EDITOR = "MAP_EDITOR",
+  }
+
+  cur_state = STATES.MAP_EDITOR
+  
 	player = {
 		x = 256,
 		y = 256,
@@ -23,6 +35,7 @@ function love.load()
   log_file:open("a") 
 
 
+  map = maps.map1
 
 end
 
@@ -46,8 +59,12 @@ end
 
 function draw_hud()
 
+  draw_map()
+
   draw_health_bar()
   draw_currently_equipped_item()  
+
+
 
 end
 
@@ -81,22 +98,35 @@ function love.update(dt)
 end
 
 
+function draw_map()
 
+
+  for y=1, #maps.map1 do
+    for x=1, #maps.map1[y] do
+      if  maps.map1[y][x] > 0 then
+        love.graphics.rectangle("line", x*32, y*32, 32, 32)
+      end
+    end
+  end
+
+
+end
 
 function love.draw()
 	love.graphics.rectangle("fill", player.act_x, player.act_y, 32, 32)
   draw_hud()
 end
 
+function get_cursor_coords()
+  print(player.act_x)
+  print(player.act_y)
+  local x = player.act_x / 32
+  local y = player.act_y / 32
+  return x,y
+end
 
-function love.keypressed(key)
-  log("Key: "..key)
-	if key == 'escape' then 
-    log("Quiting")
-    log_file:close()
-		love.event.quit()
-	end
-	if key == 'h' then
+function process_game_key(key)
+  if key == 'h' then
     log("Heal")
       if player.max_hp < player.cur_hp + 10 then
         player.cur_hp = player.max_hp
@@ -117,5 +147,62 @@ function love.keypressed(key)
   if key == 'space' then
     log("Attack")
   end
+
+
+end
+
+--TODO: Save the map to a file
+function save_map()
+end
+
+function toggle_selected_block()
+
+  local x, y = get_cursor_coords()
+
+  if maps.map1[y][x] > 0 then
+    maps.map1[y][x] = 0
+  else
+    maps.map1[y][x] = 1
+  end
+end
+
+function process_map_editor(key)
+
+  if key == "s" then
+    save_map()
+  end
+
+  if key == "space" then
+    toggle_selected_block()
+    
+  end
+
+
+end
+
+function love.keypressed(key)
+  log("Key: "..key)
+
+	if key == 'escape' then 
+    log("Quiting")
+    log_file:close()
+		love.event.quit()
+	end
+
+  -- TOGGLE STATE
+  if key == "`" then
+    if cur_state == STATES.GAME then
+      cur_state = STATES.MAP_EDITOR
+    else
+      cur_state = STATES.GAME
+    end
+  end
+
+
+  if cur_state == STATES.GAME then
+    process_game_key(key)
+  elseif cur_state == STATES.MAP_EDITOR then 
+    process_map_editor(key) 
+	end
 
 end
