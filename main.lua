@@ -39,7 +39,6 @@ function love.load()
 	log_file = love.filesystem.newFile("log"..os.time()..".txt")
 	log_file:open("a") 
 
-
 	cur_map = Map:load("maps.map")
 --[[
 	for y=1,512 do
@@ -71,7 +70,7 @@ end
 
 function draw_hud()
 
-  draw_map()
+ 
 
   draw_health_bar()
   draw_currently_equipped_item()  
@@ -104,6 +103,7 @@ function love.update(dt)
 			moving = true
 		end
 		delay_count = 0
+		print("player.x: "..player.x.." player.act_x: "..player.act_x.." player.y: "..player.y.." player.act_y: "..player.act_y)
 	else
 		delay_count = delay_count + dt
 		moving = player.speed > delay_count
@@ -123,7 +123,7 @@ function draw_map()
   for y=1, #cur_map.data do
     for x=1, #cur_map.data[y] do
       if  cur_map.data[y][x] > 0 then
-        love.graphics.rectangle("line", x*32, y*32, 32, 32)
+        love.graphics.rectangle("line", (x*32)-player.act_x, (y*32)-player.act_y, 32, 32)
       end
     end
   end
@@ -132,8 +132,12 @@ function draw_map()
 end
 
 function love.draw()
-	love.graphics.rectangle("fill", player.act_x, player.act_y, 32, 32)
+
+	love.graphics.rectangle("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 32, 32)
+ draw_map()
   draw_hud()
+
+
 end
 
 
