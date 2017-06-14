@@ -17,10 +17,10 @@ function love.load()
 	cur_state = STATES.MAP_EDITOR
 
 	player = {
-		x = 256,
-		y = 256,
-		act_x = 32,
-		act_y = 32,
+		x = love.graphics.getWidth()/2,
+		y = love.graphics.getWidth()/2,
+    off_x = 0,
+    off_y = 0,
 		speed = .125,
 		-- STATS
 		cur_hp = 100,
@@ -61,19 +61,8 @@ function draw_health_bar()
    love.graphics.setColor(r, g, b, a)
 end
 
-function draw_currently_equipped_item()
-
-end
-
 function draw_hud()
-
- 
-
   draw_health_bar()
-  draw_currently_equipped_item()  
-
-
-
 end
 
 function love.update(dt)
@@ -81,23 +70,35 @@ function love.update(dt)
 	if not moving then		
 		if love.keyboard.isDown(DIRECTION.DOWN)
 			and can_move(player.x, player.y, DIRECTION.DOWN) then 
+      log("DOWN: player.y: "..player.y.." player.x: "..player.x)
 			player.y = player.y + 32 
+      player.off_y = player.off_y + 32
 			moving = true
+ log("DOWN: player.y: "..player.y.." player.x: "..player.x)
 		end
 		if love.keyboard.isDown(DIRECTION.UP)
 			and can_move(player.x, player.y, DIRECTION.UP) then 
+ log("UP: player.y: "..player.y.." player.x: "..player.x)
 			player.y = player.y - 32 
+      player.off_y = player.off_y - 32
 			moving = true
+ log("UP: player.y: "..player.y.." player.x: "..player.x)
 		end
 		if love.keyboard.isDown(DIRECTION.LEFT)
 			and can_move(player.x, player.y, DIRECTION.LEFT) then 
+       log("LEFT: player.y: "..player.y.." player.x: "..player.x)
 			player.x = player.x - 32 
+      player.off_x = player.off_x - 32
 			moving = true
+       log("LEFT: player.y: "..player.y.." player.x: "..player.x)
 		end
 		if love.keyboard.isDown(DIRECTION.RIGHT)
 			and can_move(player.x, player.y, DIRECTION.RIGHT) then 
+ log("RIGHT: player.y: "..player.y.." player.x: "..player.x)
 			player.x = player.x + 32 
+      player.off_x = player.off_x + 32
 			moving = true
+ log("RIGHT: player.y: "..player.y.." player.x: "..player.x)
 		end
 		delay_count = 0
 	--	log("player.x: "..player.x.." player.act_x: "..player.act_x.." player.y: "..player.y.." player.act_y: "..player.act_y)
@@ -106,17 +107,12 @@ function love.update(dt)
 		moving = player.speed > delay_count
 	end
 
-	player.act_y = player.y
-	player.act_x = player.x
 --	player.act_y = player.act_y - ((player.act_y - player.y))
 --	player.act_x = player.act_x - ((player.act_x - player.x))
 
 end
 
-
 function draw_map()
-
-
   local r, g, b, a = love.graphics.getColor()
 
   love.graphics.setColor(204, 204, 204)
@@ -124,7 +120,7 @@ function draw_map()
   for y=1, #cur_map.data do
     for x=1, #cur_map.data[y] do
       if  cur_map.data[y][x] > 0 then
-        love.graphics.rectangle("fill", (x*32)-player.act_x, (y*32)-player.act_y, 32, 32)
+        love.graphics.rectangle("fill", (x*32)-player.off_x, (y*32)-player.off_y, 32, 32)
       end
     end
   end
@@ -133,28 +129,29 @@ function draw_map()
 
 end
 
-function love.draw()
-local r, g, b, a = love.graphics.getColor()
 
-love.graphics.setColor(255,102, 0) 
-	love.graphics.rectangle("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 32, 32)
+function draw_player()
+  local r, g, b, a = love.graphics.getColor()
+
+  love.graphics.setColor(255,102, 0) 
+  love.graphics.rectangle("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 32, 32)
   love.graphics.setColor(r, g, b, a)
- draw_map()
+end
+
+function love.draw()
+  draw_map()
+  draw_player() 
   draw_hud()
-
-
 end
 
 
 function conv_pixels_to_coords(x_pix, y_pix)
-	return x_pix/32, y_pix/32
+	return (x_pix/32), (y_pix/32)
 end
 
 
 function get_cursor_coords()
-  local x = player.act_x / 32
-  local y = player.act_y / 32
-  return x,y
+  return conv_pixels_to_coords(player.x, player.y)
 end
 
 function can_move(x_pix, y_pix, direction)
