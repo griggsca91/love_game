@@ -54,8 +54,11 @@ end
 
 
 function draw_health_bar()
+  local r, g, b, a = love.graphics.getColor()
+  love.graphics.setColor(0, 255, 0)
    love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.cur_hp/player.max_hp) * 250), 20)
    love.graphics.rectangle("line", 10, love.graphics.getHeight() - 100, 250, 20)
+   love.graphics.setColor(r, g, b, a)
 end
 
 function draw_currently_equipped_item()
@@ -114,20 +117,28 @@ end
 function draw_map()
 
 
+  local r, g, b, a = love.graphics.getColor()
+
+  love.graphics.setColor(204, 204, 204)
+
   for y=1, #cur_map.data do
     for x=1, #cur_map.data[y] do
       if  cur_map.data[y][x] > 0 then
-        love.graphics.rectangle("line", (x*32)-player.act_x, (y*32)-player.act_y, 32, 32)
+        love.graphics.rectangle("fill", (x*32)-player.act_x, (y*32)-player.act_y, 32, 32)
       end
     end
   end
 
+  love.graphics.setColor(r, g, b, a)
 
 end
 
 function love.draw()
+local r, g, b, a = love.graphics.getColor()
 
+love.graphics.setColor(255,102, 0) 
 	love.graphics.rectangle("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/2, 32, 32)
+  love.graphics.setColor(r, g, b, a)
  draw_map()
   draw_hud()
 
