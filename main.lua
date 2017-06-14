@@ -1,4 +1,6 @@
 Map = require "maps"
+Actor = require "actor"
+
 
 function love.load()
 
@@ -15,7 +17,7 @@ function love.load()
   }
 
   cur_state = STATES.MAP_EDITOR
-
+--[[
   player = {
     x = love.graphics.getWidth()/2,
     y = love.graphics.getWidth()/2,
@@ -30,6 +32,24 @@ function love.load()
     intelligence = 10,
     xp = 0
   }
+  --]]
+
+  player = Actor:new({
+    x = love.graphics.getWidth()/2,
+    y = love.graphics.getHeight()/2
+  })
+
+
+  badies = {}
+
+  for i = 1,10 do
+    badies[i] = Actor:new({
+      x = i*32,
+      y = i*32
+    })
+    print("x: "..badies[i].x.."y: "..badies[i].y)
+  end
+
   moving = false
   delay_count = 0
 
@@ -51,12 +71,21 @@ function log(log_m)
   print(log_m)
 end
 
-
+function draw_badies()
+ 
+  local r, g, b, a = love.graphics.getColor()
+  love.graphics.setColor(255, 0, 0)
+  for i = 1, #badies do 
+    log("x "..(badies[i].x-player.off_x).." y: "..(badies[i].y-player.off_y))
+    love.graphics.rectangle("fill", (badies[i].x)-player.off_x, (badies[i].y)-player.off_y, 32, 32)
+  end
+  love.graphics.setColor(r, g, b, a)
+end
 
 function draw_health_bar()
   local r, g, b, a = love.graphics.getColor()
   love.graphics.setColor(0, 255, 0)
-  love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.cur_hp/player.max_hp) * 250), 20)
+  love.graphics.rectangle("fill", 10, love.graphics.getHeight() - 100, ((player.stats.cur_hp/player.stats.max_hp) * 250), 20)
   love.graphics.rectangle("line", 10, love.graphics.getHeight() - 100, 250, 20)
   love.graphics.setColor(r, g, b, a)
 end
@@ -141,6 +170,7 @@ end
 function love.draw()
   draw_map()
   draw_player() 
+  draw_badies()
   draw_hud()
 end
 
@@ -177,18 +207,18 @@ end
 function process_game_key(key)
   if key == 'h' then
     log("Heal")
-    if player.max_hp < player.cur_hp + 10 then
-      player.cur_hp = player.max_hp
+    if player.stats.max_hp < player.stats.cur_hp + 10 then
+      player.stats.cur_hp = player.stats.max_hp
     else 
-      player.cur_hp = player.cur_hp + 10 
+      player.stats.cur_hp = player.stats.cur_hp + 10 
     end
   end
   if key == 'd' then
     log("Damage")
-    if 0 > player.cur_hp - 10 then 
-      player.cur_hp = 0
+    if 0 > player.stats.cur_hp - 10 then 
+      player.stats.cur_hp = 0
     else 
-      player.cur_hp = player.cur_hp - 10
+      player.stats.cur_hp = player.stats.cur_hp - 10
     end
   end
 
