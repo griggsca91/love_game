@@ -9,6 +9,14 @@ function love.load()
     MAP_EDITOR = "MAP_EDITOR",
   }
 
+
+  DIRECTION = {
+  	UP = "up",
+	DOWN = "down",
+	LEFT = "left", 
+	RIGHT = "right"
+  }
+
   cur_state = STATES.MAP_EDITOR
   
 	player = {
@@ -35,7 +43,7 @@ function love.load()
   log_file:open("a") 
 
 
-  map = maps.map1
+  cur_map = maps.map1
 
 end
 
@@ -71,19 +79,23 @@ end
 function love.update(dt)
 
 	if not moving then		
-		if love.keyboard.isDown("down") then 
+		if love.keyboard.isDown(DIRECTION.DOWN)
+			and can_move(player.x, player.y, DIRECTION.DOWN) then 
 			player.y = player.y + 32 
 			moving = true
 		end
-		if love.keyboard.isDown('up') then 
+		if love.keyboard.isDown(DIRECTION.UP)
+			and can_move(player.x, player.y, DIRECTION.UP) then 
 			player.y = player.y - 32 
 			moving = true
 		end
-		if love.keyboard.isDown('left') then 
+		if love.keyboard.isDown(DIRECTION.LEFT)
+			and can_move(player.x, player.y, DIRECTION.LEFT) then 
 			player.x = player.x - 32 
 			moving = true
 		end
-		if love.keyboard.isDown('right') then 
+		if love.keyboard.isDown(DIRECTION.RIGHT)
+			and can_move(player.x, player.y, DIRECTION.RIGHT) then 
 			player.x = player.x + 32 
 			moving = true
 		end
@@ -93,17 +105,20 @@ function love.update(dt)
 		moving = player.speed > delay_count
 	end
 
-	player.act_y = player.act_y - ((player.act_y - player.y))
-	player.act_x = player.act_x - ((player.act_x - player.x))
+	player.act_y = player.y
+	player.act_x = player.x
+--	player.act_y = player.act_y - ((player.act_y - player.y))
+--	player.act_x = player.act_x - ((player.act_x - player.x))
+
 end
 
 
 function draw_map()
 
 
-  for y=1, #maps.map1 do
-    for x=1, #maps.map1[y] do
-      if  maps.map1[y][x] > 0 then
+  for y=1, #cur_map do
+    for x=1, #cur_map[y] do
+      if  cur_map[y][x] > 0 then
         love.graphics.rectangle("line", x*32, y*32, 32, 32)
       end
     end
@@ -117,6 +132,12 @@ function love.draw()
   draw_hud()
 end
 
+
+function conv_pixels_to_coords(x_pix, y_pix)
+	return x_pix/32, y_pix/32
+end
+
+
 function get_cursor_coords()
   print(player.act_x)
   print(player.act_y)
@@ -124,6 +145,29 @@ function get_cursor_coords()
   local y = player.act_y / 32
   return x,y
 end
+
+function can_move(x_pix, y_pix, direction)
+
+	local x, y = conv_pixels_to_coords(x_pix, y_pix)
+	
+	local dir_x = x
+	local dir_y = y
+
+
+
+
+	if direction == DIRECTION.UP then dir_y = dir_y - 1
+	elseif direction == DIRECTION.DOWN then dir_y = dir_y + 1
+	elseif direction == DIRECTION.LEFT then dir_x = dir_x - 1
+	elseif direction == DIRECTION.RIGHT then dir_x = dir_x + 1
+	else error("Direction: "..direction.." is not a valid value")
+	end
+
+	log("can_move - x: "..dir_x..", y: "..dir_y.." - "..tostring((cur_map[dir_y][dir_x] == 0)))
+
+	return cur_map[dir_y][dir_x] == 0 
+end
+
 
 function process_game_key(key)
   if key == 'h' then
@@ -143,11 +187,9 @@ function process_game_key(key)
     end
 	end
 
-
   if key == 'space' then
     log("Attack")
   end
-
 
 end
 
@@ -156,53 +198,52 @@ function save_map()
 end
 
 function toggle_selected_block()
+	local x, y = get_cursor_coords()
 
-  local x, y = get_cursor_coords()
-
-  if maps.map1[y][x] > 0 then
-    maps.map1[y][x] = 0
-  else
-    maps.map1[y][x] = 1
-  end
+	if cur_map[y][x] > 0 then
+		cur_map[y][x] = 0
+	else
+		cur_map[y][x] = 1
+	end
 end
 
 function process_map_editor(key)
 
-  if key == "s" then
-    save_map()
-  end
+	if key == "s" then
+		save_map()
+	end
 
-  if key == "space" then
-    toggle_selected_block()
-    
-  end
-
+	if key == "space" then
+		toggle_selected_block()
+	end
 
 end
 
 function love.keypressed(key)
-  log("Key: "..key)
+	log("Key: "..key)
 
 	if key == 'escape' then 
-    log("Quiting")
-    log_file:close()
+		log("Quiting")
+		log_file:close()
 		love.event.quit()
 	end
 
-  -- TOGGLE STATE
-  if key == "`" then
-    if cur_state == STATES.GAME then
-      cur_state = STATES.MAP_EDITOR
-    else
-      cur_state = STATES.GAME
-    end
-  end
+	-- TOGGLE STATE
+	if key == "`" then
+		log("cur_state: "..cur_state)
+		if cur_state == STATES.GAME then
+			cur_state = STATES.MAP_EDITOR
+		else
+			cur_state = STATES.GAME
+		end
+		log("switched to: "..cur_state)
+	end
 
 
-  if cur_state == STATES.GAME then
-    process_game_key(key)
-  elseif cur_state == STATES.MAP_EDITOR then 
-    process_map_editor(key) 
+	if cur_state == STATES.GAME then
+		process_game_key(key)
+	elseif cur_state == STATES.MAP_EDITOR then 
+		process_map_editor(key) 
 	end
 
 end
