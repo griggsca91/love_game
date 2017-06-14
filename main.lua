@@ -1,14 +1,11 @@
-
 Map = require "maps"
 
 function love.load()
-
 
 	STATES = {
 		GAME = "GAME",
 		MAP_EDITOR = "MAP_EDITOR",
 	}
-
 
 	DIRECTION = {
 		UP = "up",
@@ -40,14 +37,11 @@ function love.load()
 	log_file:open("a") 
 
 	cur_map = Map:load("maps.map")
---[[
-	for y=1,512 do
-		cur_map.data[y] = {} 
-		for x=1,512 do
-			cur_map.data[y][x] = 0
-		end
-	end
---]]
+  log("loading maps.map")
+  if cur_map == nil then
+    log('maps.map could not be loaded, creating a new map')
+    cur_map = Map:new()
+  end
 end
 
 function log(log_m)
@@ -103,7 +97,7 @@ function love.update(dt)
 			moving = true
 		end
 		delay_count = 0
-		print("player.x: "..player.x.." player.act_x: "..player.act_x.." player.y: "..player.y.." player.act_y: "..player.act_y)
+	--	log("player.x: "..player.x.." player.act_x: "..player.act_x.." player.y: "..player.y.." player.act_y: "..player.act_y)
 	else
 		delay_count = delay_count + dt
 		moving = player.speed > delay_count
@@ -147,8 +141,6 @@ end
 
 
 function get_cursor_coords()
-  print(player.act_x)
-  print(player.act_y)
   local x = player.act_x / 32
   local y = player.act_y / 32
   return x,y
@@ -168,7 +160,7 @@ function can_move(x_pix, y_pix, direction)
 	else error("Direction: "..direction.." is not a valid value")
 	end
 
-	log("can_move - x: "..dir_x..", y: "..dir_y.." - "..tostring((cur_map.data[dir_y][dir_x] == 0)))
+	-- log("can_move - x: "..dir_x..", y: "..dir_y.." - "..tostring((cur_map.data[dir_y][dir_x] == 0)))
 
 	return cur_map.data[dir_y][dir_x] == 0 
 end
