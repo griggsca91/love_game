@@ -1,50 +1,54 @@
 
-maps = require "maps"
+Map = require "maps"
 
 function love.load()
 
 
-  STATES = {
-    GAME = "GAME",
-    MAP_EDITOR = "MAP_EDITOR",
-  }
+	STATES = {
+		GAME = "GAME",
+		MAP_EDITOR = "MAP_EDITOR",
+	}
 
 
-  DIRECTION = {
-  	UP = "up",
-	DOWN = "down",
-	LEFT = "left", 
-	RIGHT = "right"
-  }
+	DIRECTION = {
+		UP = "up",
+		DOWN = "down",
+		LEFT = "left", 
+		RIGHT = "right"
+	}
 
-  cur_state = STATES.MAP_EDITOR
-  
+	cur_state = STATES.MAP_EDITOR
+
 	player = {
 		x = 256,
 		y = 256,
 		act_x = 32,
 		act_y = 32,
 		speed = .125,
-
-    -- STATS
-
-    cur_hp = 100,
-    max_hp = 100,
-    strength = 10,
-    defense = 10,
-    intelligence = 10,
-    xp = 0
-
+		-- STATS
+		cur_hp = 100,
+		max_hp = 100,
+		strength = 10,
+		defense = 10,
+		intelligence = 10,
+		xp = 0
 	}
 	moving = false
 	delay_count = 0
 
-  log_file = love.filesystem.newFile("log"..os.time()..".txt")
-  log_file:open("a") 
+	log_file = love.filesystem.newFile("log"..os.time()..".txt")
+	log_file:open("a") 
 
 
-  cur_map = maps.map1
-
+	cur_map = Map:load("maps.map")
+--[[
+	for y=1,512 do
+		cur_map.data[y] = {} 
+		for x=1,512 do
+			cur_map.data[y][x] = 0
+		end
+	end
+--]]
 end
 
 function log(log_m)
@@ -116,9 +120,9 @@ end
 function draw_map()
 
 
-  for y=1, #cur_map do
-    for x=1, #cur_map[y] do
-      if  cur_map[y][x] > 0 then
+  for y=1, #cur_map.data do
+    for x=1, #cur_map.data[y] do
+      if  cur_map.data[y][x] > 0 then
         love.graphics.rectangle("line", x*32, y*32, 32, 32)
       end
     end
@@ -148,14 +152,11 @@ end
 
 function can_move(x_pix, y_pix, direction)
 
-	local x, y = conv_pixels_to_coords(x_pix, y_pix)
+
+	if cur_state == STATES.MAP_EDITOR then return true end
+
+	local dir_x, dir_y = conv_pixels_to_coords(x_pix, y_pix)
 	
-	local dir_x = x
-	local dir_y = y
-
-
-
-
 	if direction == DIRECTION.UP then dir_y = dir_y - 1
 	elseif direction == DIRECTION.DOWN then dir_y = dir_y + 1
 	elseif direction == DIRECTION.LEFT then dir_x = dir_x - 1
@@ -163,9 +164,9 @@ function can_move(x_pix, y_pix, direction)
 	else error("Direction: "..direction.." is not a valid value")
 	end
 
-	log("can_move - x: "..dir_x..", y: "..dir_y.." - "..tostring((cur_map[dir_y][dir_x] == 0)))
+	log("can_move - x: "..dir_x..", y: "..dir_y.." - "..tostring((cur_map.data[dir_y][dir_x] == 0)))
 
-	return cur_map[dir_y][dir_x] == 0 
+	return cur_map.data[dir_y][dir_x] == 0 
 end
 
 
@@ -195,15 +196,17 @@ end
 
 --TODO: Save the map to a file
 function save_map()
+	log("saving map: "..cur_map.title)
+	cur_map:save()
 end
 
 function toggle_selected_block()
 	local x, y = get_cursor_coords()
-
-	if cur_map[y][x] > 0 then
-		cur_map[y][x] = 0
+	log("toggling x: "..x.." y: "..y)
+	if cur_map.data[y][x] > 0 then
+		cur_map.data[y][x] = 0
 	else
-		cur_map[y][x] = 1
+		cur_map.data[y][x] = 1
 	end
 end
 
